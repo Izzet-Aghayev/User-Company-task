@@ -1,0 +1,142 @@
+
+---
+
+## Database Modelləri
+
+### 1 User
+| Field | Type |
+|-----|-----|
+| id | int |
+| name | string |
+| email | string (unique) |
+| password_hash | string |
+| created_at | datetime |
+
+---
+
+### 2 Company
+| Field | Type |
+|-----|-----|
+| id | int |
+| name | string |
+| industry | string (optional) |
+| owner_user_id | int |
+| created_at | datetime |
+
+---
+
+### 3 Contact
+| Field | Type |
+|-----|-----|
+| id | int |
+| first_name | string |
+| last_name | string |
+| email | string (optional) |
+| phone | string (optional) |
+| company_id | int (nullable) |
+| owner_user_id | int |
+| created_at | datetime |
+
+---
+
+### 4 Lead
+| Field | Type |
+|-----|-----|
+| id | int |
+| title | string |
+| status | new / contacted / closed |
+| company_id | int (nullable) |
+| contact_id | int (nullable) |
+| owner_user_id | int |
+| created_at | datetime |
+
+---
+
+## Autentifikasiya
+
+- JWT Access Token istifadə olunur
+- Login xaric **bütün endpoint-lər auth tələb edir**
+- İstifadəçi yalnız **öz datasına** baxa bilər
+
+### Auth Endpoint-lər
+
+| Method | Endpoint |
+|------|---------|
+| POST | `/auth/signup` |
+| POST | `/auth/login` |
+| GET | `/auth/me` |
+
+---
+
+## Companies API
+
+| Method | Endpoint |
+|------|---------|
+| POST | `/companies/create` |
+| GET | `/companies/get` |
+| GET | `/companies/get/{id}` |
+| PATCH | `/companies/update/{id}` |
+| DELETE | `/companies/delete/{id}` |
+
+## Yalnız owner icazəsi var
+
+---
+
+## Contacts API
+
+| Method | Endpoint |
+|------|---------|
+| POST | `/contacts/create` |
+| GET | `/contacts/get` |
+| GET | `/contacts/get/{id}` |
+| PATCH | `/contacts/update/{id}` |
+| DELETE | `/contacts/delete/{id}` |
+
+---
+
+##  Leads API
+
+| Method | Endpoint |
+|------|---------|
+| POST | `/leads/create` |
+| GET | `/leads/get` |
+| GET | `/leads/get/{id}` |
+| PATCH | `/leads/update/{id}` |
+| DELETE | `/leads/delete/{id}` |
+
+---
+
+##  Qaydalar (Business Logic)
+
+- İstifadəçi yalnız **öz company / contact / lead** datasını görə bilər
+- Başqa user datasına müraciət → `403 Forbidden`
+- Company silindikdə:
+  - contact və lead silinmir
+  - `company_id = NULL` olur
+- Contact və Lead update zamanı:
+  - foreign key-lər yoxlanılır
+  - başqa user datası assign edilə bilməz
+
+---
+
+##  API-ni Necə Test Etməli
+
+### Swagger UI
+
+http://localhost:8000/docs
+
+
+Addımlar:
+1. `/auth/signup` → qeydiyyat
+2. `/auth/login` → access token al
+3. Swagger sağ üst küncdə:
+
+Authorize → Bearer <ACCESS_TOKEN>
+
+
+### API işə salma
+
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
